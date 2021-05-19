@@ -1,0 +1,46 @@
+#+title: README
+* Chapter 1
+
+* Chapter 2
+
+** assoc
+
+** update
+
+** conj
+
+#+begin_src clojure
+
+    (conj language [:created 2007])
+
+    ;; {:name "Clojure", :creator "Rich Hickey", :platforms ["Java" "JavaScript" ".NET"], :created 2007}
+
+#+end_src
+
+** sort
+
+#+begin_src clojure
+
+    (sort [3 7 5 1 9])
+
+    ;; (1 3 5 7 9)
+
+#+end_src
+
+** get-in
+
+Get items in a nested map, by passing the sequence to walk in a vector.
+
+#+begin_src clojure
+
+    (get-in gemstone-db [:ruby :properties :hardness])
+
+    ;; 9.0
+
+#+end_src
+
+** assoc-in
+
+** update-in
+
+** atom
