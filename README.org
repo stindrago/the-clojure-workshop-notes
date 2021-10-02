@@ -1,4 +1,33 @@
-#+title: README
+:PROPERTIES:
+:ID:       f6d2735a-72f1-4d35-9887-de9884362e9b
+:END:
+#+TITLE: The Clojure Workshop by Joseph Fahey
+#+AUTHOR: stindrago
+#+DATE: 2021-06-01T17:35:01
+#+filetags: :coding:project:book:reading:
+#+TAGS[]: coding project book reading
+#+CATEGORY: coding
+
+* Agenda
+
+** DOIN [#B] Read The CLojure Workshop
+:PROPERTIES:
+:LAST_REPEAT: [2021-06-03 Thu 00:37]
+:END:
+:LOGBOOK:
+CLOCK: [2021-09-11 sab 17:00]--[2021-09-11 sab 20:00] =>  3:00
+- State "DONE"       from "TODO"       [2021-06-03 Thu 00:37]
+CLOCK: [2021-06-02 Wed 23:50]--[2021-06-03 Thu 00:37] =>  0:47
+State "DONE"       from "TODO"       [2021-06-02 Wed 22:00]
+CLOCK: [2021-06-02 Wed 20:40]--[2021-06-02 Wed 22:00] =>  1:20
+CLOCK: [2021-06-02 Wed 17:59]--[2021-06-02 Wed 20:00] =>  2:01
+CLOCK: [2021-06-02 Wed 10:31]--[2021-06-02 Wed 10:54] =>  0:23
+CLOCK: [2021-06-01 Tue 22:30]--<2021-06-02 Wed 00:30> =>  2:00
+- State "DONE"       from "TODO"       [2021-06-01 Tue 23:30]
+- State "TODO"       from              [2021-06-02 Wed 10:28]
+:END:
+<2021-06-04 Fri .+1d>
+
 * Chapter 1
 
 * Chapter 2
@@ -44,3 +73,252 @@ Get items in a nested map, by passing the sequence to walk in a vector.
 ** update-in
 
 ** atom
+
+* Chapter 3
+
+** Destructuring
+
+Separate elements in a data structure.
+
+- Sequentially with vectors.
+
+#+begin_src clojure
+(let [[a b c] '(1 2 3)] (str a b c))
+#+end_src
+
+#+RESULTS:
+: 123
+
+- Associatively with maps.
+
+=(let [{lat :lat lon :lon airport-name :name} airport]=
+
+*** Exercise 3.02
+
+#+begin_src clojure
+(def weapon-damage {:fists 10 :staff 35 :sword 100 :cast-iron-saucepan 150})
+
+(defn strike
+  ([enemy] (strike enemy :fists))
+  ([enemy weapon]
+   (let [damage (weapon weapon-damage)]
+     (str damage))))
+
+(defn show [damage]
+  (str damage))
+
+(strike {})
+(:sword weapon-damage)
+(show :staff)
+
+(def :no "mare")
+ok
+:no
+#+end_src
+
+#+RESULTS:
+| #'user/weapon-damage                          |
+| #'user/strike                                 |
+| #'user/show                                   |
+| "10"                                          |
+| 100                                           |
+| ":staff"                                      |
+| class clojure.lang.Compiler$CompilerException |
+| "mare"                                        |
+| :no                                           |
+
+*** Exercise 3.03
+
+#+begin_src clojure
+(def weapon-damage {:fists 10.0 :staff 35.0 :sword 100.0 :cast-iron-saucepan 150.0})
+(defn strike
+  ([target weapon]
+   (let [points (weapon weapon-damage)]
+     (if (= :gnomes (:camp target))
+       (update target :health + points)
+       (update target :health - points)))))
+(def enemy {:name "Zulkaz", :health 250, :camp :trolls})
+(strike enemy :sword)
+(def ally {:name "Carla", :health 80, :camp :gnomes})
+(strike ally :staff)
+(defn strike
+  ([target weapon]
+   (let [points (weapon weapon-damage)]
+     (if (= :gnomes (:camp target))
+       (update target :health + points)
+       (let [armor (or (:armor target) 0)
+             damage (* points (- 1 armor))]
+         (update target :health - damage))))))
+(strike enemy :cast-iron-saucepan)
+(def enemy {:name "Zulkaz", :health 250, :armor 0.8, :camp :trolls})
+(strike enemy :cast-iron-saucepan)
+(defn strike
+  ([{:keys [camp armor] :as target} weapon]
+   (let [points (weapon weapon-damage)]
+     (if (= :gnomes camp)
+       (update target :health + points)
+       (let [armor-effect (or (:armor target) 0)
+             damage (* points (- 1 armor-effect))]
+         (update target :health - damage))))))
+(defn strike
+  "With one argument, strike a target with a default :fists `weapon`. With two argument, strike a target with `weapon`.
+   Strike will heal a target that belongs to the gnomes camp."
+  ([target] (strike target :fists))
+  ([{:keys [camp armor], :or {armor 0}, :as target} weapon]
+    (let [points (weapon weapon-damage)]
+      (if (= :gnomes camp)
+        (update target :health + points)
+        (let [damage (* points (- 1 armor))]
+          (update target :health - damage))))))
+(strike enemy)
+(strike enemy :cast-iron-saucepan)
+(strike ally :staff)
+#+end_src
+
+#+RESULTS:
+| #'user/weapon-damage                                       |
+| #'user/strike                                              |
+| #'user/enemy                                               |
+| {:name "Zulkaz", :health 150.0, :camp :trolls}             |
+| #'user/ally                                                |
+| {:name "Carla", :health 115.0, :camp :gnomes}              |
+| #'user/strike                                              |
+| {:name "Zulkaz", :health 100.0, :camp :trolls}             |
+| #'user/enemy                                               |
+| {:name "Zulkaz", :health 220.0, :armor 0.8, :camp :trolls} |
+| #'user/strike                                              |
+| #'user/strike                                              |
+| {:name "Zulkaz", :health 248.0, :armor 0.8, :camp :trolls} |
+| {:name "Zulkaz", :health 220.0, :armor 0.8, :camp :trolls} |
+| {:name "Carla", :health 115.0, :camp :gnomes}              |
+
+** Higher-Order Programming
+
+#+begin_src clojure
+
+#+end_src
+
+*** Exercise 3.04
+
+#+begin_src clojure
+(def weapon-fn-map
+  {:fists (fn [health] (if (< health 100) (- health 10) health))})
+((weapon-fn-map :fists) 50)
+((weapon-fn-map :fists) 150)
+(def weapon-fn-map
+  {
+    :fists (fn [health] (if (< health 100) (- health 10) health))
+    :staff (partial + 35)
+  })
+((weapon-fn-map :staff) 150)
+(def weapon-fn-map
+  {
+    :fists (fn [health] (if (< health 100) (- health 10) health))
+    :staff (partial + 35)
+    :sword #(- % 100)
+  })
+((weapon-fn-map :sword) 150)
+(def weapon-fn-map
+  {
+    :fists (fn [health] (if (< health 100) (- health 10) health))
+    :staff (partial + 35)
+    :sword #(- % 100)
+    :cast-iron-saucepan #(- % 100 (rand-int 50))
+  })
+((weapon-fn-map :cast-iron-saucepan) 200)
+(def weapon-fn-map
+  {
+    :fists (fn [health] (if (< health 100) (- health 10) health))
+    :staff (partial + 35)
+    :sword #(- % 100)
+    :cast-iron-saucepan #(- % 100 (rand-int 50))
+    :sweet-potato identity
+  })
+(defn strike
+  "With one argument, strike a target with a default :fists `weapon`. With two argument, strike a target with `weapon` and return the target entity"
+  ([target] (strike target :fists))
+  ([target weapon]
+    (let [weapon-fn (weapon weapon-fn-map)]
+      (update target :health weapon-fn))))
+(def enemy {:name "Arnold", :health 250})
+(strike enemy :sweet-potato)
+(strike enemy :sword)
+(strike enemy :cast-iron-saucepan)
+(strike (strike enemy :sword) :cast-iron-saucepan)
+(strike enemy :sweet-potato)
+(update enemy :health (comp (:sword weapon-fn-map) (:cast-iron-saucepan weapon-fn-map)))
+(strike enemy :sweet-potato)
+(defn mighty-strike
+  "Strike a `target` with all weapons!"
+  [target]
+  (let [weapon-fn (apply comp (vals weapon-fn-map))]
+      (update target :health weapon-fn)))
+(mighty-strike enemy)
+#+end_src
+
+#+RESULTS:
+| #'user/weapon-fn-map          |
+| 40                            |
+| 150                           |
+| #'user/weapon-fn-map          |
+| 185                           |
+| #'user/weapon-fn-map          |
+| 50                            |
+| #'user/weapon-fn-map          |
+| 95                            |
+| #'user/weapon-fn-map          |
+| #'user/strike                 |
+| #'user/enemy                  |
+| {:name "Arnold", :health 250} |
+| {:name "Arnold", :health 150} |
+| {:name "Arnold", :health 137} |
+| {:name "Arnold", :health 8}   |
+| {:name "Arnold", :health 250} |
+| {:name "Arnold", :health 13}  |
+| {:name "Arnold", :health 250} |
+| #'user/mighty-strike          |
+| {:name "Arnold", :health 41}  |
+
+*** Exercise 3.05
+
+#+begin_src clojure
+(def player {:name "Lea" :health 200 :position {:x 10 :y 10 :facing :north}})
+;(defmulti move #(:facing (:position %)))
+;(ns-unmap 'user 'move)
+(defmulti move (comp :facing :position))
+(defmethod move :north
+  [entity]
+  (update-in entity [:position :y] inc))
+(defmethod move :south
+  [entity]
+  (update-in entity [:position :y] dec))
+(defmethod move :west
+  [entity]
+  (update-in entity [:position :x] inc))
+(defmethod move :east
+  [entity]
+  (update-in entity [:position :x] dec))
+(move player)
+(move player)
+(move {:position {:x 10 :y 10 :facing :west}})
+(move {:position {:x 10 :y 10 :facing :south}})
+(move {:position {:x 10 :y 10 :facing :east}})
+(defmethod move :default [entity] entity)
+(move {:position {:x 10 :y 10 :facing :wall}})
+#+end_src
+
+#+RESULTS:
+| #'user/player                                                        |
+| #multifn[move 0x1e516b0a]                                            |
+| #multifn[move 0x1e516b0a]                                            |
+| #multifn[move 0x1e516b0a]                                            |
+| #multifn[move 0x1e516b0a]                                            |
+| {:name "Lea", :health 200, :position {:x 10, :y 11, :facing :north}} |
+| {:name "Lea", :health 200, :position {:x 10, :y 11, :facing :north}} |
+| {:position {:x 11, :y 10, :facing :west}}                            |
+| {:position {:x 10, :y 9, :facing :south}}                            |
+| {:position {:x 9, :y 10, :facing :east}}                             |
+| #multifn[move 0x1e516b0a]                                            |
+| {:position {:x 10, :y 10, :facing :wall}}                            |
+
+*** Activity 3.01
